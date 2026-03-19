@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice Comptable - ProCalc</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-light: #1e293b;
+            --text-light: #e2e8f0;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-light);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            grid-column: 1 / -1;
+        }
+
+        .header h1 {
+            color: var(--text-light);
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
+        .section-title {
+            color: var(--text-light);
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 3px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .calc-display {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .calc-display:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .display-label {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .display-value {
+            font-size: 2em;
+            color: var(--primary);
+            font-weight: bold;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .input-group.full {
+            grid-template-columns: 1fr;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            background: var(--bg-dark);
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            color: var(--text-light);
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .button-group.full {
+            grid-template-columns: 1fr;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .result-box {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-label {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            font-size: 1.8em;
+            color: var(--success);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: var(--bg-dark);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.3s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(5px);
+        }
+
+        .history-operation {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .history-result {
+            color: var(--success);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .clear-btn {
+            width: 100%;
+            background: var(--danger);
+            color: white;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .calc-btn {
+            padding: 15px;
+            background: var(--bg-dark);
+            color: var(--primary);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .calc-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .calc-btn.operator {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .calc-btn.equals {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+            grid-column: span 2;
+        }
+
+        .calc-btn.equals:hover {
+            background: #16a34a;
+            transform: scale(1.05);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: var(--bg-dark);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .summary-item.ht {
+            border-left-color: var(--primary);
+        }
+
+        .summary-item.ttc {
+            border-left-color: var(--success);
+        }
+
+        .summary-item.tva {
+            border-left-color: var(--warning);
+        }
+
+        .summary-label {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 1.3em;
+            color: var(--text-light);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 ProCalc</h1>
+            <p>Calculatrice Comptable Professionnelle</p>
+        </div>
+
+        <!-- Calculatrice Classique -->
+        <div class="card">
+            <div class="section-title">Calculatrice Standard</div>
+            <div class="calc-display">
+                <div class="display-label">Résultat</div>
+                <div class="display-value" id="calcDisplay">0</div>
+            </div>
+            <div class="grid-buttons">
+                <button class="calc-btn" onclick="calcClear()">C</button>
+                <button class="calc-btn operator" onclick="calcAppend('/')">÷</button>
+                <button class="calc-btn operator" onclick="calcAppend('*')">×</button>
+                <button class="calc-btn" onclick="calcBackspace()">←</button>
+
+                <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                <button class="calc-btn operator" onclick="calcAppend('-')">−</button>
+
+                <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                <button class="calc-btn operator" onclick="calcAppend('+')">+</button>
+
+                <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                <button class="calc-btn" onclick="calcAppend('.')">.</button>
+
+                <button class="calc-btn" onclick="calcAppend('0')">0</button>
+                <button class="calc-btn" onclick="calcAppend('00')">00</button>
+                <button class="calc-btn equals" onclick="calcEqual()">=</button>
+            </div>
+        </div>
+
+        <!-- Outils Comptables -->
+        <div class="card">
+            <div class="section-title">Outils Comptables</div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('tva')">TVA</button>
+                <button class="tab-btn" onclick="switchTab('marge')">Marge</button>
+                <button class="tab-btn" onclick="switchTab('rabais')">Rabais</button>
+            </div>
+
+            <!-- Onglet TVA -->
+            <div id="tva" class="tab-content active">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <label for="montantHT">Montant HT (€)</label>
+                        <input type="number" id="montantHT" placeholder="0.00" oninput="calculTVA()">
+                    </div>
+                    <div class="input-wrapper">
+                        <label for="tauxTVA">Taux TVA (%)</label>
+                        <select id="tauxTVA" oninput="calculTVA()">
+                            <option value="5.5">5.5%</option>
+                            <option value="20" selected>20%</option>
+                            <option value="10">10%</option>
+                            <option value="2.1">2.1%</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item ht">
+                        <div class="summary-label">Montant HT</div>
+                        <div class="summary-value" id="resultatHT">0,00 €</div>
+                    </div>
+                    <div class="summary-item tva">
+                        <div class="summary-label">TVA</div>
+                        <div class="summary-value" id="resultatTVA">0,00 €</div>
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-label">Montant TTC</div>
+                    <div class="result-value" id="resultatTTC">0,00 €</div>
+                </div>
+            </div>
+
+            <!-- Onglet Marge -->
+            <div id="marge" class="tab-content">
+                <div class="input-group full">
+                    <div class="input-wrapper">
+                        <label for="prixAchat">Prix d'achat (€)</label>
+                        <input type="number" id="prixAchat" placeholder="0.00" oninput="calculMarge()">
+                    </div>
+                </div>
+                <div class="input-group full">
+                    <div class="input-wrapper">
+                        <label for="prixVente">Prix de vente (€)</label>
+                        <input type="number" id="prixVente" placeholder="0.00" oninput="calculMarge()">
+                    </div>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Marge Brute</div>
+                        <div class="summary-value" id="resultatMargeBrute">0,00 €</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Marge %</div>
+                        <div class="summary-value" id="resultatMargePercent">0,00%</div>
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-label">Coefficient</div>
+                    <div class="result-value" id="resultatCoefficient">0,00x</div>
+                </div>
+            </div>
+
+            <!-- Onglet Rabais -->
+            <div id="rabais" class="tab-content">
+                <div class="input-group full">
+                    <div class="input-wrapper">
+                        <label for="montantOriginal">Montant original (€)</label>
+                        <input type="number" id="montantOriginal" placeholder="0.00" oninput="calculRabais()">
+                    </div>
+                </div>
+                <div class="input-group full">
+                    <div class="input-wrapper">
+                        <label for="tauxRabais">Rabais (%)</label>
+                        <input type="number" id="tauxRabais" placeholder="0" oninput="calculRabais()">
+                    </div>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Réduction</div>
+                        <div class="summary-value" id="resultatReduction">0,00 €</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Montant Original</div>
+                        <div class="summary-value" id="resultatMontantOriginal">0,00 €</div>
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-label">Prix Final</div>
+                    <div class="result-value" id="resultatPrixFinal">0,00 €</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historique -->
+        <div class="card">
+            <div class="section-title">Historique</div>
+            <div class="history" id="history">
+                <p style="color: var(--text-muted); text-align: center; padding: 20px;">Aucun calcul pour le moment</p>
+            </div>
+            <button class="btn-danger clear-btn" onclick="clearHistory()">Effacer l'historique</button>
+        </div>
+
+        <!-- Convertisseur -->
+        <div class="card">
+            <div class="section-title">Convertisseur Devises</div>
+            <div class="input-group full">
+                <div class="input-wrapper">
+                    <label for="montantConv">Montant (€)</label>
+                    <input type="number" id="montantConv" placeholder="0.00" oninput="convertDevise()">
+                </div>
+            </div>
+            <div class="input-group full">
+                <div class="input-wrapper">
+                    <label for="deviseSelect">Convertir en</label>
+                    <select id="deviseSelect" oninput="convertDevise()">
+                        <option value="1">EUR (€)</option>
+                        <option value="1.10">USD ($) - 1.10</option>
+                        <option value="0.86">GBP (£) - 0.86</option>
+                        <option value="6.30">CHF (CHF) - 6.30</option>
+                        <option value="1.23">CAD ($) - 1.23</option>
+                        <option value="1020">JPY (¥) - 1020</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result-box">
+                <div class="result-label">Résultat</div>
+                <div class="result-value" id="resultatConversion">0,00</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // État de la calculatrice
+        let calcState = {
+            display: '0',
+            operator: null,
+            previousValue: null,
+            waitingForNewValue: false
+        };
+
+        // Historique
+        let history = JSON.parse(localStorage.getItem('calcHistory')) || [];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            displayHistory();
+        });
+
+        // Calculatrice Standard
+        function calcAppend(value) {
+            const { display, waitingForNewValue } = calcState;
+
+            if (waitingForNewValue) {
+                calcState.display = String(value);
+                calcState.waitingForNewValue = false;
+            } else {
+                calcState.display = display === '0' ? String(value) : display + String(value);
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('calcDisplay').textContent = calcState.display;
+        }
+
+        function calcClear() {
+            calcState = {
+                display: '0',
+                operator: null,
+                previousValue: null,
+                waitingForNewValue: false
+            };
+            updateDisplay();
+        }
+
+        function calcBackspace() {
+            const { display } = calcState;
+            calcState.display = display.length === 1 ? '0' : display.slice(0, -1);
+            updateDisplay();
+        }
+
+        function calcAppend(value) {
+            if (['+', '-', '*', '/'].includes(value)) {
+                if (calcState.operator !== null && !calcState.waitingForNewValue) {
+                    calcEqual();
+                }
+                calcState.operator = value;
+                calcState.previousValue = parseFloat(calcState.display);
+                calcState.waitingForNewValue = true;
+            } else {
+                const { display, waitingForNewValue } = calcState;
+                if (waitingForNewValue && display === '0') {
+                    calcState.display = String(value);
+                    calcState.waitingForNewValue = false;
+                } else if (value === '.' && display.includes('.')) {
+                    return;
+                } else {
+                    calcState.display = display === '0' && value !== '.' ? String(value) : display + String(value);
+                    calcState.waitingForNewValue = false;
+                }
+            }
+            updateDisplay();
+        }
+
+        function calcEqual() {
+            const { display, operator, previousValue } = calcState;
+            if (operator === null || previousValue === null) return;
+
+            const currentValue = parseFloat(display);
+            let result = 0;
+
+            switch (operator) {
+                case '+':
+                    result = previousValue + currentValue;
+                    break;
+                case '-':
+                    result = previousValue - currentValue;
+                    break;
+                case '*':
+                    result = previousValue * currentValue;
+                    break;
+                case '/':
+                    result = previousValue / currentValue;
+                    break;
+            }
+
+            result = Math.round(result * 100000000) / 100000000;
+            addToHistory(`${previousValue} ${operator} ${currentValue}`, result);
+            calcState.display = String(result);
+            calcState.operator = null;
+            calcState.previousValue = null;
+            calcState.waitingForNewValue = true;
+            updateDisplay();
+        }
+
+        // Onglets
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // TVA
+        function calculTVA() {
+            const montantHT = parseFloat(document.getElementById('montantHT').value) || 0;
+            const tauxTVA = parseFloat(document.getElementById('tauxTVA').value) || 0;
+            const montantTVA = montantHT * (tauxTVA / 100);
+            const montantTTC = montantHT + montantTVA;
+
+            document.getElementById('resultatHT').textContent = formatMoney(montantHT);
+            document.getElementById('resultatTVA').textContent = formatMoney(montantTVA);
+            document.getElementById('resultatTTC').textContent = formatMoney(montantTTC);
+
+            addToHistory(`TVA ${tauxTVA}% sur ${montantHT}€`, montantTTC);
+        }
+
+        // Marge
+        function calculMarge() {
+            const prixAchat = parseFloat(document.getElementById('prixAchat').value) || 0;
+            const prixVente = parseFloat(document.getElementById('prixVente').value) || 0;
+            const margeBrute = prixVente - prixAchat;
+            const margePercent = prixAchat > 0 ? (margeBrute / prixAchat) * 100 : 0;
+            const coefficient = prixAchat > 0 ? prixVente / prixAchat : 0;
+
+            document.getElementById('resultatMargeBrute').textContent = formatMoney(margeBrute);
+            document.getElementById('resultatMargePercent').textContent = margePercent.toFixed(2) + '%';
+            document.getElementById('resultatCoefficient').textContent = coefficient.toFixed(2) + 'x';
+
+            addToHistory(`Marge: achat ${prixAchat}€, vente ${prixVente}€`, margeBrute);
+        }
+
+        // Rabais
+        function calculRabais() {
+            const montantOriginal = parseFloat(document.getElementById('montantOriginal').value) || 0;
+            const tauxRabais = parseFloat(document.getElementById('tauxRabais').value) || 0;
+            const reduction = montantOriginal * (tauxRabais / 100);
+            const prixFinal = montantOriginal - reduction;
+
+            document.getElementById('resultatReduction').textContent = formatMoney(reduction);
+            document.getElementById('resultatMontantOriginal').textContent = formatMoney(montantOriginal);
+            document.getElementById('resultatPrixFinal').textContent = formatMoney(prixFinal);
+
+            addToHistory(`Rabais ${tauxRabais}% sur ${montantOriginal}€`, prixFinal);
+        }
+
+        // Convertisseur
+        function convertDevise() {
+            const montant = parseFloat(document.getElementById('montantConv').value) || 0;
+            const taux = parseFloat(document.getElementById('deviseSelect').value) || 1;
+            const resultat = montant * taux;
+
+            document.getElementById('resultatConversion').textContent = resultat.toFixed(2);
+            addToHistory(`Conversion: ${montant}€ × ${taux}`, resultat);
+        }
+
+        // Historique
+        function addToHistory(operation, result) {
+            history.unshift({
+                operation,
+                result,
+                timestamp: new Date().toLocaleTimeString('fr-FR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                })
+            });
+
+            if (history.length > 20) history.pop();
+            localStorage.setItem('calcHistory', JSON.stringify(history));
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const historyDiv = document.getElementById('history');
+            
+            if (history.length === 0) {
+                historyDiv.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">Aucun calcul pour le moment</p>';
+                return;
+            }
+
+            historyDiv.innerHTML = history.map((item, index) => `
+                <div class="history-item">
+                    <div class="history-operation">${item.operation}</div>
+                    <div class="history-result">${formatMoney(item.result)} • ${item.timestamp}</div>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            if (confirm('Êtes-vous sûr de vouloir effacer tout l\'historique ?')) {
+                history = [];
+                localStorage.removeItem('calcHistory');
+                displayHistory();
+            }
+        }
+
+        // Utilitaires
+        function formatMoney(value) {
+            return new Intl.NumberFormat('fr-FR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value) + ' €';
+        }
+
+        // Clavier
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') calcAppend(e.key);
+            if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') calcAppend(e.key);
+            if (e.key === '.') calcAppend('.');
+            if (e.key === 'Enter') calcEqual();
+            if (e.key === 'Backspace') calcBackspace();
+            if (e.key === 'Escape') calcClear();
+        });
+    </script>
+</body>
+</html>
