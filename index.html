@@ -640,18 +640,6 @@
         });
 
         // Calculatrice Standard
-        function calcAppend(value) {
-            const { display, waitingForNewValue } = calcState;
-
-            if (waitingForNewValue) {
-                calcState.display = String(value);
-                calcState.waitingForNewValue = false;
-            } else {
-                calcState.display = display === '0' ? String(value) : display + String(value);
-            }
-            updateDisplay();
-        }
-
         function updateDisplay() {
             document.getElementById('calcDisplay').textContent = calcState.display;
         }
